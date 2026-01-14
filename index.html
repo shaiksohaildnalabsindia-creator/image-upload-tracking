@@ -2,48 +2,90 @@
 <html>
 <head>
   <title>Tracking Image Upload</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+    }
+    input, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    img {
+      max-width: 100%;
+      margin-top: 10px;
+      display: none;
+    }
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>Upload Image</h2>
+  <h2>Upload Image</h2>
 
-<input type="text" id="trackingNo" placeholder="Enter Tracking Number"><br><br>
+  <input type="text" id="trackingNo" placeholder="Enter Tracking Number">
 
-<input type="file" id="imageFile" accept="image/*" capture="environment"><br><br>
+  <input type="file" id="imageFile" accept="image/*" capture="environment">
 
-<button onclick="uploadImage()">Upload Image</button>
+  <img id="preview">
 
-<p id="status"></p>
+  <button onclick="uploadImage()">Upload Image</button>
+
+  <p id="status"></p>
 
 <script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwcxAFdQUl6xdYIg9bfNOgilZ8ICpxJ_GTH7lzdZjq6_uzLe46FGUf8gZT2N4BTgW6RAg/exec";
+
+document.getElementById("imageFile").addEventListener("change", function () {
+  const file = this.files[0];
+  if (file) {
+    const img = document.getElementById("preview");
+    img.src = URL.createObjectURL(file);
+    img.style.display = "block";
+  }
+});
+
 function uploadImage() {
   const trackingNo = document.getElementById("trackingNo").value;
   const file = document.getElementById("imageFile").files[0];
 
   if (!trackingNo || !file) {
-    alert("Enter tracking number and select image");
+    alert("Please enter tracking number and select image");
     return;
   }
 
   const reader = new FileReader();
-  reader.onload = async function () {
+  reader.onload = function () {
     const base64 = reader.result.split(",")[1];
 
     const formData = new URLSearchParams();
     formData.append("trackingNo", trackingNo);
     formData.append("image", base64);
-    formData.append("fileName", file.name);
     formData.append("mimeType", file.type);
 
     document.getElementById("status").innerText = "Uploading...";
 
-    const response = await fetch("Google Apps Script
-Script function not found: doGet", {
+    // 🔥 no-cors is REQUIRED
+    fetch(WEB_APP_URL, {
       method: "POST",
-      body: formData
+      body: formData,
+      mode: "no-cors"
     });
 
     document.getElementById("status").innerText = "Upload successful!";
+    document.getElementById("trackingNo").value = "";
+    document.getElementById("imageFile").value = "";
+    document.getElementById("preview").style.display = "none";
   };
 
   reader.readAsDataURL(file);
