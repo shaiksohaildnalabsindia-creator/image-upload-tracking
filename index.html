@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tracking Image Upload</title>
+</head>
+<body>
+
+<h2>Upload Image</h2>
+
+<input type="text" id="trackingNo" placeholder="Enter Tracking Number"><br><br>
+
+<input type="file" id="imageFile" accept="image/*" capture="environment"><br><br>
+
+<button onclick="uploadImage()">Upload Image</button>
+
+<p id="status"></p>
+
+<script>
+function uploadImage() {
+  const trackingNo = document.getElementById("trackingNo").value;
+  const file = document.getElementById("imageFile").files[0];
+
+  if (!trackingNo || !file) {
+    alert("Enter tracking number and select image");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async function () {
+    const base64 = reader.result.split(",")[1];
+
+    const formData = new URLSearchParams();
+    formData.append("trackingNo", trackingNo);
+    formData.append("image", base64);
+    formData.append("fileName", file.name);
+    formData.append("mimeType", file.type);
+
+    document.getElementById("status").innerText = "Uploading...";
+
+    const response = await fetch("https://script.google.com/macros/s/AKfycbxAn28ck90pSG68Tg-NUDs0TNCdgevI8cW8KOmlWV6RyqQZBfxSjBLkIzzm6V3ezuFzRw/exec", {
+      method: "POST",
+      body: formData
+    });
+
+    document.getElementById("status").innerText = "Upload successful!";
+  };
+
+  reader.readAsDataURL(file);
+}
+</script>
+
+</body>
+</html>
